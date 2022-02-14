@@ -1,24 +1,30 @@
-import React, { useState } from 'react';
+/* eslint-disable comma-dangle */
+import React, { useState, useEffect } from 'react';
 import Users from './components/users';
-import SearchStatus from './components/searchStatus';
 import api from './API';
 
 function App() {
     const [users, setUsers] = useState(api.users.fetchAll());
+
+    useEffect(() => {
+        api.users.fetchAll().then((data) => setUsers(data));
+    }, []);
+
     const handleDelete = (userId) => {
         setUsers(users.filter((user) => user._id !== userId));
     };
-    const handleToggleBookMark = (userId) => {
-        const elementIndex = users.findIndex((user) => user._id === userId);
-        const newUsers = [...users];
-        const bool = newUsers[elementIndex].bookmark === false;
-        newUsers[elementIndex].bookmark = bool;
-        setUsers(newUsers);
+    const handleToggleBookMark = (id) => {
+        setUsers(
+            users.map((user) => {
+                if (user._id === id) {
+                    return { ...user, bookmark: !user.bookmark };
+                }
+                return user;
+            })
+        );
     };
     return (
         <>
-            <SearchStatus length={users.length} />
-
             <Users
                 key={users._id}
                 onDelete={handleDelete}

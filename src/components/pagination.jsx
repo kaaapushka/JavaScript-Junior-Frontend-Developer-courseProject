@@ -17,6 +17,7 @@ const Pagintion = ({ itemsCount, pageSize, onPageChange, currentPage }) => {
                             (page === currentPage ? 'active' : '')
                         }
                         key={page}
+                        role='button'
                     >
                         <a
                             className='page-link'
