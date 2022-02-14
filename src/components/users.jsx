@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import User from './user';
 import Pagintion from './pagination';
 import { paginate } from '../utils/paginate';
 import PropTypes from 'prop-types';
@@ -7,6 +6,7 @@ import GroupList from './groupList';
 import api from '../API';
 import SearchStatus from './searchStatus';
 import _ from 'lodash';
+import UserTable from './usersTabels';
 
 const Users = ({ users: allUsers, ...rest }) => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -28,6 +28,10 @@ const Users = ({ users: allUsers, ...rest }) => {
 
     const handlePageChange = (pageIndex) => {
         setCurrentPage(pageIndex);
+    };
+
+    const handleSort = (item) => {
+        console.log(item);
     };
 
     const filteredUsers = selectedProf
@@ -60,24 +64,11 @@ const Users = ({ users: allUsers, ...rest }) => {
             <div className='d-flex flex-column'>
                 <SearchStatus length={count} />
                 {count > 0 && (
-                    <table className='table'>
-                        <thead>
-                            <tr>
-                                <th scope='col'>Имя</th>
-                                <th scope='col'>Качества</th>
-                                <th scope='col'>Провфессия</th>
-                                <th scope='col'>Встретился, раз</th>
-                                <th scope='col'>Оценка</th>
-                                <th scope='col'>Избранное</th>
-                                <th />
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {usersCrop.map((user) => (
-                                <User key={user._id} {...rest} {...user} />
-                            ))}
-                        </tbody>
-                    </table>
+                    <UserTable
+                        onSort={handleSort}
+                        users={usersCrop}
+                        {...rest}
+                    />
                 )}
                 <div className='d-flex justify-content-center'>
                     <Pagintion
@@ -93,7 +84,7 @@ const Users = ({ users: allUsers, ...rest }) => {
 };
 
 Users.propTypes = {
-    users: PropTypes.object.isRequired,
+    users: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
 };
 
 export default Users;
