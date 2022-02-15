@@ -143,6 +143,7 @@ const users = [
         bookmark: false,
     },
 ];
+
 const fetchAll = () =>
     new Promise((resolve) => {
         window.setTimeout(function () {

@@ -1,3 +1,5 @@
+/* eslint-disable comma-dangle */
+/* eslint-disable indent */
 import React, { useState, useEffect } from 'react';
 import Pagintion from './pagination';
 import { paginate } from '../utils/paginate';
@@ -8,11 +10,32 @@ import SearchStatus from './searchStatus';
 import _ from 'lodash';
 import UserTable from './usersTabels';
 
-const Users = ({ users: allUsers, ...rest }) => {
+const Users = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [professions, setProfessions] = useState();
     const [selectedProf, setSelectedProf] = useState();
-    const pageSize = 2;
+    const [sortBy, setSortBy] = useState({ iter: 'name', order: 'asc' });
+    const pageSize = 8;
+
+    const [users, setUsers] = useState(api.users.fetchAll());
+
+    useEffect(() => {
+        api.users.fetchAll().then((data) => setUsers(data));
+    }, []);
+
+    const handleDelete = (userId) => {
+        setUsers(users.filter((user) => user._id !== userId));
+    };
+    const handleToggleBookMark = (id) => {
+        setUsers(
+            users.map((user) => {
+                if (user._id === id) {
+                    return { ...user, bookmark: !user.bookmark };
+                }
+                return user;
+            })
+        );
+    };
 
     useEffect(() => {
         api.professions.fetchAll().then((data) => setProfessions(data));
@@ -31,60 +54,74 @@ const Users = ({ users: allUsers, ...rest }) => {
     };
 
     const handleSort = (item) => {
-        console.log(item);
+        setSortBy(item);
     };
 
-    const filteredUsers = selectedProf
-        ? allUsers.filter((user) => _.isEqual(user.profession, selectedProf))
-        : allUsers;
+    if (users) {
+        const filteredUsers = selectedProf
+            ? users.filter(
+                  (user) =>
+                      JSON.stringify(user.profession) ===
+                      JSON.stringify(selectedProf)
+              )
+            : users;
 
-    const count = filteredUsers.length;
+        const count = filteredUsers.length;
+        const sortedUsers = _.orderBy(
+            filteredUsers,
+            [sortBy.path],
+            [sortBy.order]
+        );
+        const usersCrop = paginate(sortedUsers, currentPage, pageSize);
+        const clearFilter = () => {
+            setSelectedProf();
+        };
 
-    const usersCrop = paginate(filteredUsers, currentPage, pageSize);
-    const clearFilter = () => {
-        setSelectedProf();
-    };
-    return (
-        <div className='d-flex'>
-            {professions && (
-                <div className='d-flex flex-column flex-shrink-0 p-3'>
-                    <GroupList
-                        selectedItem={selectedProf}
-                        items={professions}
-                        onItemSelect={handleProfessionSelect}
-                    />
-                    <button
-                        className='btn btn-secondary mt-2'
-                        onClick={clearFilter}
-                    >
-                        Очистить
-                    </button>
-                </div>
-            )}
-            <div className='d-flex flex-column'>
-                <SearchStatus length={count} />
-                {count > 0 && (
-                    <UserTable
-                        onSort={handleSort}
-                        users={usersCrop}
-                        {...rest}
-                    />
+        return (
+            <div className='d-flex'>
+                {professions && (
+                    <div className='d-flex flex-column flex-shrink-0 p-3'>
+                        <GroupList
+                            selectedItem={selectedProf}
+                            items={professions}
+                            onItemSelect={handleProfessionSelect}
+                        />
+                        <button
+                            className='btn btn-secondary mt-2'
+                            onClick={clearFilter}
+                        >
+                            Очистить
+                        </button>
+                    </div>
                 )}
-                <div className='d-flex justify-content-center'>
-                    <Pagintion
-                        itemsCount={count}
-                        pageSize={pageSize}
-                        currentPage={currentPage}
-                        onPageChange={handlePageChange}
-                    />
+                <div className='d-flex flex-column'>
+                    <SearchStatus length={count} />
+                    {count > 0 && (
+                        <UserTable
+                            selectedSort={sortBy}
+                            onSort={handleSort}
+                            users={usersCrop}
+                            onDelete={handleDelete}
+                            onToggleBookMark={handleToggleBookMark}
+                        />
+                    )}
+                    <div className='d-flex justify-content-center'>
+                        <Pagintion
+                            itemsCount={count}
+                            pageSize={pageSize}
+                            currentPage={currentPage}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    }
+    return 'loading...';
 };
 
 Users.propTypes = {
-    users: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
+    users: PropTypes.array,
 };
 
 export default Users;
