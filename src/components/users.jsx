@@ -1,5 +1,6 @@
 /* eslint-disable comma-dangle */
 /* eslint-disable indent */
+import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import Pagintion from './pagination';
 import { paginate } from '../utils/paginate';
@@ -9,6 +10,7 @@ import api from '../API';
 import SearchStatus from './searchStatus';
 import _ from 'lodash';
 import UserTable from './usersTabels';
+import User from './user';
 
 const Users = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -16,8 +18,7 @@ const Users = () => {
     const [selectedProf, setSelectedProf] = useState();
     const [sortBy, setSortBy] = useState({ iter: 'name', order: 'asc' });
     const pageSize = 8;
-
-    const [users, setUsers] = useState(api.users.fetchAll());
+    const [users, setUsers] = useState();
 
     useEffect(() => {
         api.users.fetchAll().then((data) => setUsers(data));
@@ -77,45 +78,51 @@ const Users = () => {
             setSelectedProf();
         };
 
-        return (
-            <div className='d-flex'>
-                {professions && (
-                    <div className='d-flex flex-column flex-shrink-0 p-3'>
-                        <GroupList
-                            selectedItem={selectedProf}
-                            items={professions}
-                            onItemSelect={handleProfessionSelect}
-                        />
-                        <button
-                            className='btn btn-secondary mt-2'
-                            onClick={clearFilter}
-                        >
-                            Очистить
-                        </button>
-                    </div>
-                )}
-                <div className='d-flex flex-column'>
-                    <SearchStatus length={count} />
-                    {count > 0 && (
-                        <UserTable
-                            selectedSort={sortBy}
-                            onSort={handleSort}
-                            users={usersCrop}
-                            onDelete={handleDelete}
-                            onToggleBookMark={handleToggleBookMark}
-                        />
+        const params = useParams();
+        const { userId } = params;
+        if (userId) {
+            return <User userId={userId} users={users} />;
+        } else {
+            return (
+                <div className='d-flex'>
+                    {professions && (
+                        <div className='d-flex flex-column flex-shrink-0 p-3'>
+                            <GroupList
+                                selectedItem={selectedProf}
+                                items={professions}
+                                onItemSelect={handleProfessionSelect}
+                            />
+                            <button
+                                className='btn btn-secondary mt-2'
+                                onClick={clearFilter}
+                            >
+                                Очистить
+                            </button>
+                        </div>
                     )}
-                    <div className='d-flex justify-content-center'>
-                        <Pagintion
-                            itemsCount={count}
-                            pageSize={pageSize}
-                            currentPage={currentPage}
-                            onPageChange={handlePageChange}
-                        />
+                    <div className='d-flex flex-column'>
+                        <SearchStatus length={count} />
+                        {count > 0 && (
+                            <UserTable
+                                selectedSort={sortBy}
+                                onSort={handleSort}
+                                users={usersCrop}
+                                onDelete={handleDelete}
+                                onToggleBookMark={handleToggleBookMark}
+                            />
+                        )}
+                        <div className='d-flex justify-content-center'>
+                            <Pagintion
+                                itemsCount={count}
+                                pageSize={pageSize}
+                                currentPage={currentPage}
+                                onPageChange={handlePageChange}
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
-        );
+            );
+        }
     }
     return 'loading...';
 };
