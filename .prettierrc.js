@@ -1,7 +1,14 @@
+// module.exports = {
+//     trailingComma: 'all',
+//     tabWidth: 4,
+//     semi: true,
+//     singleQuote: true,
+//     jsxSingleQuote: true,
+// };
+
 module.exports = {
-    trailingComma: 'all',
+    trailingComma: 'none',
     tabWidth: 4,
     semi: true,
-    singleQuote: true,
-    jsxSingleQuote: true,
+    singleQuote: true
 };
